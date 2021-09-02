@@ -45,8 +45,6 @@ class Snake:
 
     # place the block at a certain position on the screen
     def place(self):
-        self.parent_screen.fill((240, 248, 255))
-
         # to draw the multiple blocks of the chain
         for i in range(self.length):
             self.parent_screen.blit(self.block, (self.x[i], self.y[i]))
@@ -83,7 +81,13 @@ class Snake:
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((1000, 600)) # display screen
+        pygame.display.set_caption("Snake Game")
+
+        pygame.mixer.init()
+        self.background_music()
+
+        # display screen
+        self.screen = pygame.display.set_mode((1000, 600))
         self.screen.fill((240, 248, 255))
         self.snake = Snake(self.screen, 1)
         self.snake.place()
@@ -101,28 +105,48 @@ class Game:
         score = font.render(f"Score: {self.snake.length}", True, (0, 0, 0))
         self.screen.blit(score, (890, 10))
 
+    def sounds(self, sound):
+        if sound == "crash":
+            sound = pygame.mixer.Sound("resources/crash.mp3")
+        elif sound == 'ding':
+            sound = pygame.mixer.Sound("resources/ding.mp3")
+        pygame.mixer.Sound.play(sound)
+
+    def background_music(self):
+        pygame.mixer.music.load("resources/bg_music_1.mp3")
+        pygame.mixer.music.play(-1, 0)
+
+    def background_image(self):
+        bg = pygame.image.load("resources/bg.jpg")
+        self.screen.blit(bg, (0, 0))
+
     def play(self):
+        self.background_image()
         self.snake.move()
         self.apple.place()
         self.display_score()
         pygame.display.flip()
 
         if self.check_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y):
+            self.sounds("ding")
             self.snake.increase_length()
             self.apple.move()
 
         for i in range(1, self.snake.length):
             if self.check_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
-                raise "Game over"
+                self.sounds("crash")
+                raise Exception('Collision occurred')
 
     def game_over(self):
-        self.screen.fill((240, 248, 255))
+        self.background_image()
         font = pygame.font.SysFont('calibri', 24)
         line1 = font.render(f"Game is over! Your score is {self.snake.length}", True, (0, 0, 0))
         self.screen.blit(line1, (200, 300))
         line2 = font.render("To play again press Enter. To exit press Escape!", True, (0, 0, 0))
         self.screen.blit(line2, (200, 350))
         pygame.display.flip()
+
+        pygame.mixer.music.pause()
 
     def reset(self):
         self.snake = Snake(self.screen, 1)
@@ -139,6 +163,7 @@ class Game:
                     if event.key == K_ESCAPE:
                         running = False
                     if event.key == K_RETURN:
+                        pygame.mixer.music.unpause()
                         pause = False
 
                     if not pause:
