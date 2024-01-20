@@ -8,11 +8,12 @@ So far, the list includes:
 - Mastermind
 - Tic Tac Toe
 - Snakes
+- War
 
 Currently working on:
 
 - Tic Tac Toe (AI Version)
 - Game of Life
-- War
+- Blackjack
 
 Many more games are coming!
